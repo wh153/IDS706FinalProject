@@ -63,19 +63,21 @@ def main():
 
     with RESTClient(key) as client:
         iteration = 0
-        interval = 365
+        days_each_loop = 3
+        interval = 365 // days_each_loop + 1
         seen = set()
-        while iteration < interval:
-            delta = datetime.timedelta(days=-iteration - 1)
-            # end_time = "2021-11-16"
-            end_time = datetime.datetime.now() + delta
-            start_time = end_time + datetime.timedelta(days=-3)
 
-            end_time = end_time.strftime("%Y-%m-%d")
-            start_time = start_time.strftime("%Y-%m-%d")
+        end_time = datetime.datetime.now() + datetime.timedelta(days=-1)
+        start_time = end_time + datetime.timedelta(days=-days_each_loop)
+
+        while iteration < interval:
+            # end_time = "2021-11-16"
+
+            end_time_str = end_time.strftime("%Y-%m-%d")
+            start_time_str = start_time.strftime("%Y-%m-%d")
 
             response = client.stocks_equities_aggregates(
-                "AAPL", 1, "minute", start_time, end_time, unadjusted=False
+                "AAPL", 1, "minute", start_time_str, end_time_str, unadjusted=False
             )
 
             ticker = response.ticker
@@ -96,7 +98,11 @@ def main():
                     # print(f"{dt}\n\tO: {op}\n\tH: {high}\n\tL: {low}\n\tC: {cl}\n\tV: {vol}")
                     temp = [ticker, dt, time_int, op, cl, high, low, vol]
                     csv_write.writerow(temp)
+
             iteration += 1
+            end_time = start_time
+            start_time = end_time + datetime.timedelta(days=-days_each_loop)
+
             time.sleep(15)
 
 
