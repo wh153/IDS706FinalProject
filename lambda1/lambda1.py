@@ -9,8 +9,6 @@ from polygon import RESTClient
 from decimal import Decimal
 
 
-
-
 # SETUP LOGGING
 import logging
 from pythonjsonlogger import jsonlogger
@@ -24,20 +22,18 @@ LOG.addHandler(logHandler)
 
 
 # Start boto3 session
-REGION = 'us-east-2'
-ACCESS_KEY = 'AKIAU6FAXB5BZ76AH7OQ'
-SECRET_KEY = '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'
+REGION = "us-east-2"
+ACCESS_KEY = "AKIAU6FAXB5BZ76AH7OQ"
+SECRET_KEY = "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"
 boto3 = boto3.Session(
-    aws_access_key_id=ACCESS_KEY,
-    aws_secret_access_key=SECRET_KEY,
-    region_name=REGION
+    aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=REGION
 )
 
 
 # Start of Script
-dynamodb = boto3.resource('dynamodb')
-dynamoTable = dynamodb.Table('stockprice')
-ticker = 'AAPL'
+dynamodb = boto3.resource("dynamodb")
+dynamoTable = dynamodb.Table("stockprice")
+ticker = "AAPL"
 
 # script to pull stock price from Polygon API
 def get_current_time_local_time_zone():
@@ -66,13 +62,16 @@ def timestring_to_datetime(timestring):
 def query_last_entry(ticker):
     """query latest time of the ticker"""
     response = dynamoTable.query(
-        ProjectionExpression='time_str, #ts',
+        ProjectionExpression="time_str, #ts",
         ExpressionAttributeNames={"#ts": "time"},
-        KeyConditionExpression=Key('ticker').eq(ticker),
+        KeyConditionExpression=Key("ticker").eq(ticker),
         ScanIndexForward=False,
-        Limit=1)
+        Limit=1,
+    )
 
-    last_time = datetime.datetime.strptime(response['Items'][0]['time_str'], '%Y-%m-%d %H:%M').strftime("%Y-%m-%d %H:%M")
+    last_time = datetime.datetime.strptime(
+        response["Items"][0]["time_str"], "%Y-%m-%d %H:%M"
+    ).strftime("%Y-%m-%d %H:%M")
     return last_time
 
 
@@ -90,25 +89,27 @@ def get_price(ticker):
         )
 
         ticker = response.ticker
-        
+
         prices = pd.DataFrame.from_dict(response.results)
-        prices.rename(columns = {
-            't':'time',
-            'o':'open',
-            'c':'close',
-            'h':'high',
-            'l':'low',
-            'v':'volume',
-            'vw':'volume_weighted_price',
-            'n':'number_of_trades'
-        },
-        inplace=True)
-        prices['time'] = prices.time / 1000
-        prices['time_str'] = prices.time.apply(lambda x: timestring_to_datetime(x))
-        prices['ticker'] = ticker
+        prices.rename(
+            columns={
+                "t": "time",
+                "o": "open",
+                "c": "close",
+                "h": "high",
+                "l": "low",
+                "v": "volume",
+                "vw": "volume_weighted_price",
+                "n": "number_of_trades",
+            },
+            inplace=True,
+        )
+        prices["time"] = prices.time / 1000
+        prices["time_str"] = prices.time.apply(lambda x: timestring_to_datetime(x))
+        prices["ticker"] = ticker
 
         return prices
-        
+
 
 # code to load pandas df to DDB in chunks
 def float_to_decimal(num):
@@ -124,24 +125,38 @@ def write_chunk_to_dynamo(df):
     write pandas df to DDB in chunks
     this is much faster than writing by row
     """
-    logging_helper = df.groupby('ticker').agg({'time': [max, min]})['time'].reset_index()
-    logging_helper.rename(columns = {'max': 'max_time', 'min': 'min_time'}, inplace = True)
-    
+    logging_helper = (
+        df.groupby("ticker").agg({"time": [max, min]})["time"].reset_index()
+    )
+    logging_helper.rename(columns={"max": "max_time", "min": "min_time"}, inplace=True)
+
     # reorder columns
-    cols = ['ticker', 'time', 'close', 'high', 'low', 'open', 'time_str', 'volume', 'volume_weighted_price']
+    cols = [
+        "ticker",
+        "time",
+        "close",
+        "high",
+        "low",
+        "open",
+        "time_str",
+        "volume",
+        "volume_weighted_price",
+    ]
     df = df[cols]
 
     # load df to dynamodb
     # 1. convert float to decimal because DynamoDB cannot handle float
     for i in df.columns:
         datatype = df[i].dtype
-        if datatype == 'float64':
+        if datatype == "float64":
             df[i] = df[i].apply(float_to_decimal)
     # 2. write to dynamodb
-    wr.dynamodb.put_df(df=df, table_name='stockprice', boto3_session=boto3)
-    
+    wr.dynamodb.put_df(df=df, table_name="stockprice", boto3_session=boto3)
+
     for _, row in logging_helper.iterrows():
-        log_dynamo_msg = (f"Put price of {row[0]} from time {row[2]} to time {row[1]} into table.")
+        log_dynamo_msg = (
+            f"Put price of {row[0]} from time {row[2]} to time {row[1]} into table."
+        )
         LOG.info(log_dynamo_msg)
 
 
@@ -153,7 +168,7 @@ def write_to_dynamo(df):
     while start_idx < len(df):
         df_to_load = df[start_idx:end_idx]
         write_chunk_to_dynamo(df_to_load)
-        
+
         start_idx = end_idx
         end_idx = min(len(df), start_idx + n)
         pass
@@ -163,7 +178,17 @@ def write_to_dynamo(df):
 def write_to_dynamo_deprecated(df):
     """Put Pandas DF to dynamodb"""
     # ensure we only get the columns we want, no extra columns
-    cols = ['ticker', 'time', 'close', 'high', 'low', 'open', 'time_str', 'volume', 'volume_weighted_price']
+    cols = [
+        "ticker",
+        "time",
+        "close",
+        "high",
+        "low",
+        "open",
+        "time_str",
+        "volume",
+        "volume_weighted_price",
+    ]
     df = df[cols]
     for idx, row in df.iterrows():
         ticker = str(row[0])
@@ -175,32 +200,31 @@ def write_to_dynamo_deprecated(df):
         low = str(row[4])
         volume = str(row[-2])
         volume_weighted = str(row[-1])
-        
+
         dynamoTable.put_item(
-            Item = {
-                'ticker': ticker,
-                'time': time,
-                'time_str': time_str,
-                'open': open,
-                'close': close,
-                'high': high,
-                'low': low,
-                'volume': volume,
-                'volume_weighted_price': volume_weighted
-            })
-    
-    log_dynamo_msg = (f"Put price of {ticker} at {time_str} into table.")
+            Item={
+                "ticker": ticker,
+                "time": time,
+                "time_str": time_str,
+                "open": open,
+                "close": close,
+                "high": high,
+                "low": low,
+                "volume": volume,
+                "volume_weighted_price": volume_weighted,
+            }
+        )
+
+    log_dynamo_msg = f"Put price of {ticker} at {time_str} into table."
     LOG.info(log_dynamo_msg)
+
 
 def lambda_handler(event, context):
     """Entry point for labmda"""
-    
+
     # function for pulling stock price and cleaning data
-    ticker = 'AAPL'
+    ticker = "AAPL"
     prices = get_price(ticker)
 
     # load data to DynamoDB
     write_to_dynamo(prices)
-
-
-
