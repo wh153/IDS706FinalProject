@@ -43,7 +43,7 @@ def get_current_time_local_time_zone():
     Returns:
         [string]: ["2021-11-15"]
     """
-    return time.strftime("%Y-%m-%d %H:%M", time.localtime())
+    return time.strftime("%Y-%m-%d", time.localtime())
 
 
 def timestring_to_datetime(timestring):
@@ -72,7 +72,7 @@ def query_last_entry(ticker):
 
     last_time = datetime.datetime.strptime(
         response["Items"][0]["time_str"], "%Y-%m-%d %H:%M"
-    ).strftime("%Y-%m-%d %H:%M")
+    )
     return last_time
 
 
@@ -81,9 +81,10 @@ def get_price(ticker):
     key = "CG0mfIrTZlytZFDyMr1kOGcIpNtj4HpT"
 
     with RESTClient(key) as client:
-        start_time = "2021-11-17"
-        # start_time = query_last_entry(ticker)
-        # end_time = "2021-11-16"
+        last_data_time = query_last_entry(ticker)
+        #start_time = "2021-11-19"
+        start_time = last_data_time.strftime("%Y-%m-%d")
+        #end_time = "2021-11-16"
         end_time = get_current_time_local_time_zone()
         response = client.stocks_equities_aggregates(
             ticker, 1, "minute", start_time, end_time, unadjusted=False
@@ -105,9 +106,14 @@ def get_price(ticker):
             },
             inplace=True,
         )
-        prices["time"] = prices.time / 1000
         prices["time_str"] = prices.time.apply(lambda x: timestring_to_datetime(x))
+        prices["time"] = prices.time / 1000
         prices["ticker"] = ticker
+
+        # polygon API grabs data for the entire day
+        # we want to filter out the data that we already have
+        last_data_time_stamp = time.mktime(last_data_time.timetuple())
+        prices = prices[prices.time >= last_data_time_stamp]
 
         return prices
 
@@ -165,13 +171,17 @@ def write_to_dynamo(df):
     """Put Pandas DF to dynamodb in 50 row chunks"""
     n = 50
     start_idx = 0
-    end_idx = min(len(df), n)
+    end_idx = min(df.shape[0], n)
     while start_idx < len(df):
-        df_to_load = df[start_idx:end_idx]
+        df_to_load = df.iloc[start_idx:end_idx,:]
         write_chunk_to_dynamo(df_to_load)
 
         start_idx = end_idx
-        end_idx = min(len(df), start_idx + n)
+        end_idx = min(df.shape[0], start_idx + n)
+
+        # sleep for 1 sec so that we don't get throttled
+        time.sleep(1)
+
         pass
     pass
 
@@ -229,3 +239,15 @@ def lambda_handler(event, context):
 
     # load data to DynamoDB
     write_to_dynamo(prices)
+
+    # logging
+    logging_helper = (
+        prices.groupby("ticker").agg({"time": [max, min]})["time"].reset_index()
+    )
+    logging_helper.rename(columns={"max": "max_time", "min": "min_time"}, inplace=True)
+
+    for _, row in logging_helper.iterrows():
+        log_dynamo_msg = (
+            f"Finished loading all chunks of {row[0]}. Min time {row[2]} to max time {row[1]}."
+        )
+        LOG.info(log_dynamo_msg)
