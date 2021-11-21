@@ -69,7 +69,7 @@ def main():
             delta = datetime.timedelta(days=-iteration - 1)
             # end_time = "2021-11-16"
             end_time = datetime.datetime.now() + delta
-            start_time = end_time + datetime.timedelta(days=-1)
+            start_time = end_time + datetime.timedelta(days=-3)
 
             end_time = end_time.strftime("%Y-%m-%d")
             start_time = start_time.strftime("%Y-%m-%d")
