@@ -1,5 +1,7 @@
 pandas
 boto3
 botocore
-time
-datetime
+
+python_json_logger
+
+polygon-api-client
