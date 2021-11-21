@@ -23,8 +23,9 @@ LOG.addHandler(logHandler)
 
 # Start boto3 session
 REGION = "us-east-2"
-ACCESS_KEY = "AKIAU6FAXB5BZ76AH7OQ"
-SECRET_KEY = "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"
+KEYS = pd.read_csv("C:\\Users\\Robert\\Desktop\\rootkey.csv", header=None)
+ACCESS_KEY = KEYS.iloc[0,1]
+SECRET_KEY = KEYS.iloc[1,1]
 boto3 = boto3.Session(
     aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=REGION
 )
