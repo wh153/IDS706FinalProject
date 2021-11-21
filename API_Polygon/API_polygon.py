@@ -1,6 +1,7 @@
 from polygon import RESTClient
 import datetime
 import time
+import csv
 
 """
 def main():
@@ -45,25 +46,58 @@ def main():
     """[extract ticker, open price, close price, high price, low price, and volumn]"""
     key = "CG0mfIrTZlytZFDyMr1kOGcIpNtj4HpT"
 
+    path = "price.csv"
+    with open(path, "w") as f:
+        csv_write = csv.writer(f)
+        csv_header = [
+            "ticker",
+            "datetime",
+            "datetime_int",
+            "open",
+            "close",
+            "high",
+            "low",
+            "volumn",
+        ]
+        csv_write.writerow(csv_header)
+
     with RESTClient(key) as client:
-        start_time = "2021-11-16"
-        # end_time = "2021-11-16"
-        end_time = get_current_time_local_time_zone()
-        response = client.stocks_equities_aggregates(
-            "AAPL", 5, "minute", start_time, end_time, unadjusted=False
-        )
+        iteration = 0
+        interval = 365
+        seen = set()
+        while iteration < interval:
+            delta = datetime.timedelta(days=-iteration - 1)
+            # end_time = "2021-11-16"
+            end_time = datetime.datetime.now() + delta
+            start_time = end_time + datetime.timedelta(days=-1)
 
-        ticker = response.ticker
-        print("the ticker is:", ticker)
+            end_time = end_time.strftime("%Y-%m-%d")
+            start_time = start_time.strftime("%Y-%m-%d")
 
-        for result in response.results:
-            print("time: ", result["t"])
-            time_int = result["t"]
-            dt = timestring_to_datetime(time_int)
-            op, cl = result["o"], result["c"]
-            high, low = result["h"], result["l"]
-            vol = result["v"]
-            print(f"{dt}\n\tO: {op}\n\tH: {high}\n\tL: {low}\n\tC: {cl}\n\tV: {vol}")
+            response = client.stocks_equities_aggregates(
+                "AAPL", 1, "minute", start_time, end_time, unadjusted=False
+            )
+
+            ticker = response.ticker
+            print("the ticker is:", ticker)
+
+            with open(path, "a+") as f:
+                csv_write = csv.writer(f)
+                for result in response.results:
+                    # print("time: ", result["t"])
+                    time_int = result["t"]
+                    if time_int in seen:
+                        continue
+                    seen.add(time_int)
+                    dt = timestring_to_datetime(time_int)
+                    op, cl = result["o"], result["c"]
+                    high, low = result["h"], result["l"]
+                    vol = result["v"]
+                    # print(f"{dt}\n\tO: {op}\n\tH: {high}\n\tL: {low}\n\tC: {cl}\n\tV: {vol}")
+                    temp = [ticker, dt, time_int, op, cl, high, low, vol]
+                    csv_write.writerow(temp)
+            iteration += 1
+            time.sleep(15)
 
 
 if __name__ == "__main__":
