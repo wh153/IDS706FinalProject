@@ -81,7 +81,7 @@ def get_price(ticker):
     key = "CG0mfIrTZlytZFDyMr1kOGcIpNtj4HpT"
 
     with RESTClient(key) as client:
-        start_time = "2019-11-17"
+        start_time = "2021-11-17"
         # start_time = query_last_entry(ticker)
         # end_time = "2021-11-16"
         end_time = get_current_time_local_time_zone()
@@ -103,6 +103,7 @@ def get_price(ticker):
             'n':'number_of_trades'
         },
         inplace=True)
+        prices['time'] = prices.time / 1000
         prices['time_str'] = prices.time.apply(lambda x: timestring_to_datetime(x))
         prices['ticker'] = ticker
 
@@ -140,26 +141,26 @@ def write_chunk_to_dynamo(df):
     wr.dynamodb.put_df(df=df, table_name='stockprice', boto3_session=boto3)
     
     for _, row in logging_helper.iterrows():
-        print(row)
-    log_dynamo_msg = (f"Put price of {row[0]} from time {row[2]} to time {row[1]} into table.")
-    LOG.info(log_dynamo_msg)
+        log_dynamo_msg = (f"Put price of {row[0]} from time {row[2]} to time {row[1]} into table.")
+        LOG.info(log_dynamo_msg)
 
 
 def write_to_dynamo(df):
     """Put Pandas DF to dynamodb in 50 row chunks"""
+    n = 50
     start_idx = 0
-    end_idx = min(len(df), 50)
+    end_idx = min(len(df), n)
     while start_idx < len(df):
         df_to_load = df[start_idx:end_idx]
         write_chunk_to_dynamo(df_to_load)
         
         start_idx = end_idx
-        end_idx = min(len(df), start_idx + 50)
+        end_idx = min(len(df), start_idx + n)
         pass
     pass
 
 
-def write_to_dynamo(df):
+def write_to_dynamo_deprecated(df):
     """Put Pandas DF to dynamodb"""
     # ensure we only get the columns we want, no extra columns
     cols = ['ticker', 'time', 'close', 'high', 'low', 'open', 'time_str', 'volume', 'volume_weighted_price']
