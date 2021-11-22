@@ -81,7 +81,7 @@ def main():
             )
 
             ticker = response.ticker
-            print("the ticker is:", ticker)
+            #print("the ticker is:", ticker)
 
             with open(path, "a+") as f:
                 csv_write = csv.writer(f)
@@ -103,7 +103,8 @@ def main():
             end_time = start_time
             start_time = end_time + datetime.timedelta(days=-days_each_loop)
 
-            time.sleep(15)
+            print(f'Pulled prices from {start_time.strftime("%Y-%m-%d %H:%M")} to {end_time.strftime("%Y-%m-%d %H:%M")}.')
+            time.sleep(20)
 
 
 if __name__ == "__main__":

@@ -1,12 +1,14 @@
 import pandas as pd
 import time
 import datetime
+import pytz
 import boto3
 import botocore
 from boto3.dynamodb.conditions import Key
 import awswrangler as wr
 from polygon import RESTClient
 from decimal import Decimal
+
 
 
 # SETUP LOGGING
@@ -37,14 +39,15 @@ dynamodb = boto3.resource("dynamodb", region_name = REGION)
 dynamoTable = dynamodb.Table("stockprice")
 
 # script to pull stock price from Polygon API
-def get_current_time_local_time_zone():
-    """[get_current_time_local_time_zone]
+def get_current_time_eastern_time_zone():
+    """[get_current_time_eastern_time_zone]
 
     Returns:
         [string]: ["2021-11-15"]
     """
-    return time.strftime("%Y-%m-%d", time.localtime())
-
+    utc = datetime.datetime.now(pytz.utc)
+    t = utc.astimezone(pytz.timezone("US/Eastern")).strftime("%Y-%m-%d")
+    return t
 
 def timestring_to_datetime(timestring):
     """[transform into the datetime type]
@@ -56,7 +59,8 @@ def timestring_to_datetime(timestring):
         [datetime]: [datetime object]
     """
     timestring /= 1000
-    t = datetime.datetime.fromtimestamp(timestring).strftime("%Y-%m-%d %H:%M")
+    t = datetime.datetime.utcfromtimestamp(timestring).replace(tzinfo=pytz.utc)
+    t = t.astimezone(pytz.timezone("US/Eastern")).strftime("%Y-%m-%d %H:%M")
     return t
 
 
@@ -70,10 +74,14 @@ def query_last_entry(ticker):
         Limit=1,
     )
 
-    last_time = datetime.datetime.strptime(
-        response["Items"][0]["time_str"], "%Y-%m-%d %H:%M"
+    timestamp = int(response["Items"][0]["time"])
+    last_time = datetime.datetime.utcfromtimestamp(
+        timestamp
+    ).replace(tzinfo=pytz.utc)
+    last_time = last_time.astimezone(pytz.timezone("US/Eastern")).strftime(
+        "%Y-%m-%d"
     )
-    return last_time
+    return timestamp, last_time
 
 
 def get_price(ticker):
@@ -81,11 +89,11 @@ def get_price(ticker):
     key = "CG0mfIrTZlytZFDyMr1kOGcIpNtj4HpT"
 
     with RESTClient(key) as client:
-        last_data_time = query_last_entry(ticker)
-        #start_time = "2021-11-19"
-        start_time = last_data_time.strftime("%Y-%m-%d")
-        #end_time = "2021-11-16"
-        end_time = get_current_time_local_time_zone()
+        last_data_ts, last_data_date = query_last_entry(ticker)
+        # start_time = "2021-11-19"
+        start_time = last_data_date
+        # end_time = "2021-11-16"
+        end_time = get_current_time_eastern_time_zone()
         response = client.stocks_equities_aggregates(
             ticker, 1, "minute", start_time, end_time, unadjusted=False
         )
@@ -112,8 +120,7 @@ def get_price(ticker):
 
         # polygon API grabs data for the entire day
         # we want to filter out the data that we already have
-        last_data_time_stamp = time.mktime(last_data_time.timetuple())
-        prices = prices[prices.time >= last_data_time_stamp]
+        prices = prices[prices.time >= last_data_ts]
 
         return prices
 
