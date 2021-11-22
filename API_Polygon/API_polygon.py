@@ -44,7 +44,7 @@ def timestring_to_datetime(timestring):
 
 def main():
     """[extract ticker, open price, close price, high price, low price, and volumn]"""
-    key = "CG0mfIrTZlytZFDyMr1kOGcIpNtj4HpT"
+    key = "API Key"
 
     path = "price.csv"
     with open(path, "w") as f:
