@@ -7,3 +7,8 @@ pytest
 python_json_logger
 polygon-api-client
 awswrangler
+plotly 5.1.0
+tenacity 8.0.1
+pystan
+ephem
+fbprophet
