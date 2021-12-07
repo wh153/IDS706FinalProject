@@ -9,7 +9,7 @@ polygon-api-client
 awswrangler
 plotly==5.1.0
 tenacity==8.0.1
-httpstan==4.6.1
-pystan
+httpstan
+pystan==2.19.1.1
 ephem
 fbprophet
