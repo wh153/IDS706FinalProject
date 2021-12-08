@@ -2,6 +2,8 @@ from polygon import RESTClient
 import datetime
 import time
 import csv
+import os
+
 
 """
 def main():
@@ -44,7 +46,7 @@ def timestring_to_datetime(timestring):
 
 def main():
     """[extract ticker, open price, close price, high price, low price, and volumn]"""
-    key = "API Key"
+    key = os.environ["polygon_API_key"]
 
     path = "price.csv"
     with open(path, "w") as f:
@@ -81,7 +83,7 @@ def main():
             )
 
             ticker = response.ticker
-            #print("the ticker is:", ticker)
+            # print("the ticker is:", ticker)
 
             with open(path, "a+") as f:
                 csv_write = csv.writer(f)
@@ -103,7 +105,9 @@ def main():
             end_time = start_time
             start_time = end_time + datetime.timedelta(days=-days_each_loop)
 
-            print(f'Pulled prices from {start_time.strftime("%Y-%m-%d %H:%M")} to {end_time.strftime("%Y-%m-%d %H:%M")}.')
+            print(
+                f'Pulled prices from {start_time.strftime("%Y-%m-%d %H:%M")} to {end_time.strftime("%Y-%m-%d %H:%M")}.'
+            )
             time.sleep(20)
 
 

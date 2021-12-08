@@ -1,5 +1,8 @@
 name: CI/CD
 
+env:
+  polygon_API_key: ${{ secrets.polygon_API_key }}
+
 on:
   push:
     branches: [ main ]
