@@ -48,6 +48,7 @@ def get_current_time_eastern_time_zone():
     t = utc.astimezone(pytz.timezone("US/Eastern")).strftime("%Y-%m-%d")
     return t
 
+
 def timestring_to_datetime(timestring):
     """[transform into the datetime type]
 
@@ -74,12 +75,8 @@ def query_last_entry(ticker):
     )
 
     timestamp = int(response["Items"][0]["time"])
-    last_time = datetime.datetime.utcfromtimestamp(
-        timestamp
-    ).replace(tzinfo=pytz.utc)
-    last_time = last_time.astimezone(pytz.timezone("US/Eastern")).strftime(
-        "%Y-%m-%d"
-    )
+    last_time = datetime.datetime.utcfromtimestamp(timestamp).replace(tzinfo=pytz.utc)
+    last_time = last_time.astimezone(pytz.timezone("US/Eastern")).strftime("%Y-%m-%d")
     return timestamp, last_time
 
 

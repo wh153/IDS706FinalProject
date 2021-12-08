@@ -25,8 +25,8 @@ LOG.addHandler(logHandler)
 # Start boto3 session
 REGION = "us-east-2"
 KEYS = pd.read_csv("C:\\Users\\Robert\\Desktop\\rootkey.csv", header=None)
-ACCESS_KEY = KEYS.iloc[0,1]
-SECRET_KEY = KEYS.iloc[1,1]
+ACCESS_KEY = KEYS.iloc[0, 1]
+SECRET_KEY = KEYS.iloc[1, 1]
 boto3 = boto3.Session(
     aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=REGION
 )
@@ -38,22 +38,20 @@ dynamoTable = dynamodb.Table("stockprice")
 def clean_historical_data(df):
     """clean historical data"""
     # rename columns
-    df.rename(columns = {
-        'datetime': 'time_str',
-        'volumn': 'volume',
-        'datetime_int': 'time'
-    },
-    inplace = True)
+    df.rename(
+        columns={"datetime": "time_str", "volumn": "volume", "datetime_int": "time"},
+        inplace=True,
+    )
 
     # add volume_weighted_price column
     # we probably don't need this, but it's in the lambda
-    df['volume_weighted_price'] = np.NaN
+    df["volume_weighted_price"] = np.NaN
 
     # sort time time
-    df.sort_values(by='time', inplace=True)
+    df.sort_values(by="time", inplace=True)
 
     # divide timestamp by 1000
-    df['time'] = df.time / 1000
+    df["time"] = df.time / 1000
 
     # reset index
     df.reset_index(inplace=True, drop=True)
@@ -128,7 +126,7 @@ def write_to_dynamo(df):
     start_idx = 0
     end_idx = min(df.shape[0], n)
     while start_idx < len(df):
-        df_to_load = df.iloc[start_idx:end_idx,:]
+        df_to_load = df.iloc[start_idx:end_idx, :]
         write_chunk_to_dynamo(df_to_load)
 
         start_idx = end_idx
@@ -141,12 +139,14 @@ def write_to_dynamo(df):
     pass
 
 
-if __name__=="__main__":
-    prices = pd.read_csv('C:\\Users\\Robert\\Documents\\GitHub\\IDS706FinalProject\\price.csv')
+if __name__ == "__main__":
+    prices = pd.read_csv(
+        "C:\\Users\\Robert\\Documents\\GitHub\\IDS706FinalProject\\price.csv"
+    )
     clean_historical_data(prices)
-    
-    last_time = query_last_entry('AAPL')
+
+    last_time = query_last_entry("AAPL")
     prices = prices[prices.time >= last_time]
     prices.reset_index(inplace=True, drop=True)
-    
+
     write_to_dynamo(prices)

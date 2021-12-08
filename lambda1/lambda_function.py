@@ -10,7 +10,6 @@ from polygon import RESTClient
 from decimal import Decimal
 
 
-
 # SETUP LOGGING
 import logging
 from pythonjsonlogger import jsonlogger
@@ -35,7 +34,7 @@ boto3 = boto3.Session(
 """
 
 # Start of Script
-dynamodb = boto3.resource("dynamodb", region_name = REGION)
+dynamodb = boto3.resource("dynamodb", region_name=REGION)
 dynamoTable = dynamodb.Table("stockprice")
 
 # script to pull stock price from Polygon API
@@ -48,6 +47,7 @@ def get_current_time_eastern_time_zone():
     utc = datetime.datetime.now(pytz.utc)
     t = utc.astimezone(pytz.timezone("US/Eastern")).strftime("%Y-%m-%d")
     return t
+
 
 def timestring_to_datetime(timestring):
     """[transform into the datetime type]
@@ -75,12 +75,8 @@ def query_last_entry(ticker):
     )
 
     timestamp = int(response["Items"][0]["time"])
-    last_time = datetime.datetime.utcfromtimestamp(
-        timestamp
-    ).replace(tzinfo=pytz.utc)
-    last_time = last_time.astimezone(pytz.timezone("US/Eastern")).strftime(
-        "%Y-%m-%d"
-    )
+    last_time = datetime.datetime.utcfromtimestamp(timestamp).replace(tzinfo=pytz.utc)
+    last_time = last_time.astimezone(pytz.timezone("US/Eastern")).strftime("%Y-%m-%d")
     return timestamp, last_time
 
 
@@ -180,7 +176,7 @@ def write_to_dynamo(df):
     start_idx = 0
     end_idx = min(df.shape[0], n)
     while start_idx < len(df):
-        df_to_load = df.iloc[start_idx:end_idx,:]
+        df_to_load = df.iloc[start_idx:end_idx, :]
         write_chunk_to_dynamo(df_to_load)
 
         start_idx = end_idx
@@ -254,7 +250,5 @@ def lambda_handler(event, context):
     logging_helper.rename(columns={"max": "max_time", "min": "min_time"}, inplace=True)
 
     for _, row in logging_helper.iterrows():
-        log_dynamo_msg = (
-            f"Finished loading all chunks of {row[0]}. Min time {row[2]} to max time {row[1]}."
-        )
+        log_dynamo_msg = f"Finished loading all chunks of {row[0]}. Min time {row[2]} to max time {row[1]}."
         LOG.info(log_dynamo_msg)
