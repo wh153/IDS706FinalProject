@@ -13,6 +13,7 @@ from prophet.serialize import model_to_json, model_from_json
 # SETUP LOGGING
 import logging
 from pythonjsonlogger import jsonlogger
+
 LOG = logging.getLogger()
 LOG.setLevel(logging.INFO)
 logHandler = logging.StreamHandler()
@@ -51,7 +52,7 @@ def query_data(ticker):
     )
 
     df = pd.DataFrame(response["Items"])
-    
+
     return df
 
 
@@ -74,28 +75,28 @@ def truncate_most_recent_day(df):
     """
     truncate price data for the most recent day
     predictions will have a 1-day lag, but will be in "real-time" (i.e. changing)
-    
+
     this is because we get data with at end of day with the free API
     """
     now = int(time.time())
     yesterday = now - 86400
     df = df[df.time <= yesterday]
-    
+
     # logging
     if LOG.hasHandlers():
         LOG.handlers.clear()
         LOG.addHandler(logHandler)
- 
+
     # get max and min time queried for each ticker
     logging_helper = (
         df.groupby("ticker").agg({"time": [max, min]})["time"].reset_index()
     )
     logging_helper.rename(columns={"max": "max_time", "min": "min_time"}, inplace=True)
     # get row counts for each ticker
-    row_ct = df.groupby("ticker").count().reset_index().iloc[:,0:2]
-    row_ct.rename(columns={'low':'rows'})
+    row_ct = df.groupby("ticker").count().reset_index().iloc[:, 0:2]
+    row_ct.rename(columns={"low": "rows"})
 
-    logging_helper = pd.merge(logging_helper, row_ct, on='ticker')
+    logging_helper = pd.merge(logging_helper, row_ct, on="ticker")
     for _, row in logging_helper.iterrows():
         log_dynamo_msg = f"After truncation, data for {row[0]} ranges from min time {row[2]} to max time {row[1]}. {row[3]} rows"
         LOG.info(log_dynamo_msg)
@@ -183,9 +184,9 @@ def save_forecast_to_s3(df):
     csv_buffer = StringIO()
     df.to_csv(csv_buffer)
 
-    #furthest_time_predicted = df.sort_values("time", ascending=False).time[0]
-    #csv_name = "prediction_through_" + str(furthest_time_predicted)
-    s3.Object(bucket, 'stock_forecast.csv').put(Body=csv_buffer.getvalue())
+    # furthest_time_predicted = df.sort_values("time", ascending=False).time[0]
+    # csv_name = "prediction_through_" + str(furthest_time_predicted)
+    s3.Object(bucket, "stock_forecast.csv").put(Body=csv_buffer.getvalue())
 
 
 def lambda_handler(event, context):
