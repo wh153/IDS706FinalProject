@@ -1,0 +1,8 @@
+pandas
+numpy
+boto3
+python-json-logger
+flask
+httpstan
+pystan==2.19.1.1
+prophet

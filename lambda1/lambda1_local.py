@@ -244,11 +244,16 @@ def lambda_handler(event, context):
     write_to_dynamo(prices)
 
     # logging
+    # get max and min time queried for each ticker
     logging_helper = (
         prices.groupby("ticker").agg({"time": [max, min]})["time"].reset_index()
     )
     logging_helper.rename(columns={"max": "max_time", "min": "min_time"}, inplace=True)
+    # get row counts for each ticker
+    row_ct = prices.groupby("ticker").count().reset_index().iloc[:,0:2]
+    row_ct.rename(columns={'low':'rows'})
 
+    logging_helper = pd.merge(logging_helper, row_ct, on='ticker')
     for _, row in logging_helper.iterrows():
-        log_dynamo_msg = f"Finished loading all chunks of {row[0]}. Min time {row[2]} to max time {row[1]}."
+        log_dynamo_msg = f"Finished loading all chunks of {row[0]}. Min time {row[2]} to max time {row[1]}. {row[3]} row(s)."
         LOG.info(log_dynamo_msg)
