@@ -8,6 +8,9 @@ import pandas as pd
 
 from lambda_function import main as run_model
 
+import os
+import sys
+
 
 app = dash.Dash()
 
@@ -86,6 +89,33 @@ def app_layout(df):
 
 
 app_layout(df)
+
+@app.callback(Output('container-button-timestamp', 'children'),
+              [Input('btn-nclicks-1', 'n_clicks'),
+               Input('btn-nclicks-2', 'n_clicks')])
+
+
+
+
+         
+def displayClick(btn1,btn2):
+    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+    print(changed_id)
+    msg=str()
+
+    if 'btn-nclicks-2.n_clicks' == changed_id:
+        print("YES")
+        new_model, new_df = run_model()
+        fig = draw_graphs(new_df)
+        app_layout(new_df)
+        
+    elif 'btn-nclicks-1.n_clicks' == changed_id:
+        print("YES")
+        os.execl(sys.executable, sys.executable, *sys.argv)
+    else:
+        print("")
+    
+    
 
 
 if __name__ == "__main__":
