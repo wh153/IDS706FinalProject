@@ -32,7 +32,9 @@ Stock price prediction is a time-series regression problem. After testing multip
 
 ### 3. Interfacing with Users through Dash and Docker
 #### Front End Application Built with Dash
-We built a front end using the `dash` package in Python. A screenshot of the front end in its initial state is shown below:
+We built a front end using the `dash` package in Python. The code for the dash application can be found at `lamda2_docker/dash_app.py`. Besides dependent packages, the dash application calls two custom methods - `lambda2_docker/lambda_function.py` to pull data and run model, and `lambda2_docker/clean_and_plot.py` to create the objects used in the application.
+
+A screenshot of the front end in its initial state is shown below:
 
 ![image](https://user-images.githubusercontent.com/37159376/145722721-e2259585-3ab3-44c0-8d2c-5ff8bc7a3ff7.png)
 
@@ -49,7 +51,9 @@ A screenshot of the expected result is shown below:
 
 
 #### Docker Image Hosted on AWS ECS
-The dash application and its dependencies are containerized as a Docker image to enable easy accessibility to the application. To make sure the application is always availble to people in every corner of the world, we hosted the Docker image on AWS ECS. It can be accessed at: http://3.16.218.189/.
+The dash application and its dependencies are containerized as a Docker image to enable easy accessibility to the application. The Dockerfile to build the image can be found at `lambda2_docker/Dockerfile`. To make sure the application is always availble to people in every corner of the world, we hosted the Docker image on AWS ECS using a Fargate instance. Fargate instances are easy to set up, require low maintenance, and charge very little fees, which are great features for a straightforward application like this one. 
+
+The application can be accessed at: http://3.16.218.189/.
 
 ## Continuous integration and Secret Protection
 Github Actions is used for continuous integration. It is realized by the YML file. The CI workflow is triggered by any push actions. In the CI workflow, the packages, and libraries requirements are checked, the codes are lint and checked to be in good formats, and file integrity is tested using Pytest.
