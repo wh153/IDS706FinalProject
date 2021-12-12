@@ -138,4 +138,4 @@ def displayClick(n_clicks):
 
 
 if __name__ == "__main__":
-    app.run_server(port=8080, debug=True)
+    app.run_server(port=80)

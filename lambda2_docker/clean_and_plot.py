@@ -1,6 +1,6 @@
 import pandas as pd
 import plotly.express as px
-from lambda2_local import main as run_model
+from lambda_function import main as run_model
 
 
 def create_df_for_plot(df_clean, forecast):
