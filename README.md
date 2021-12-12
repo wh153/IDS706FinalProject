@@ -1,13 +1,14 @@
 # Real Time Apple Stock Price Prediction Dash Web Application 
 [![CI/CD](https://github.com/wh153/IDS706FinalProject/actions/workflows/CI&CD.yml/badge.svg)](https://github.com/wh153/IDS706FinalProject/actions/workflows/CI&CD.yml)
 
-The project aimed to take advantage of the cloud technologies and platforms to build a data engineering pipeline for predicting stock prices. The application consists of three major parts:
+The project aimed to take advantage of the cloud technologies and platforms to build a data engineering pipeline for predicting stock prices. The application can be accessed at: http://3.16.218.189/.
 
+## Architecture
+The application consists of three major parts:
 1. Retrieving and Storing Data
 2. Predicting Stock Prices
 3. Interfacing with Users through Dash and Docker
 
-## Architecture
 The overall architecture of the application is as follows:
 
 ![image](https://user-images.githubusercontent.com/89489224/145718732-08271fa2-0278-4525-90ad-4689170904d5.png)
