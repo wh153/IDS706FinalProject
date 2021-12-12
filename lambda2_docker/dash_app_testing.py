@@ -112,6 +112,7 @@ def displayClick(btn1,btn2):
         new_model, new_df = run_model()
         fig = draw_graphs(new_df)
         app_layout(new_df)
+
         
     elif 'btn-nclicks-1.n_clicks' == changed_id:
         print("YES")
@@ -123,4 +124,4 @@ def displayClick(btn1,btn2):
 
 
 if __name__ == "__main__":
-    app.run_server(host="0.0.0.0", port=80)
+    app.run_server(port=80, debug=True)

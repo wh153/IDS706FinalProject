@@ -34,7 +34,8 @@ RUN python -c "from prophet import Prophet"
 WORKDIR /app
 
 EXPOSE 80
-EXPOSE 8050
+EXPOSE 8080
+
 # entry point
 ENTRYPOINT [ "python" ]
 CMD [ "/app/dash_app.py" ]
