@@ -1,5 +1,0 @@
-python-json-logger
-boto3
-httpstan
-pystan==2.19.1.1
-prophet
