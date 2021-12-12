@@ -1,3 +1,0 @@
-python-json-logger
-boto3
-pmdarima
