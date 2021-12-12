@@ -13,5 +13,6 @@ In the project, real-time data is adopted. We take Apple as an example. The data
 A lambda function triggered by a Cloud-Watch is built for retrieving data every minute using RESTful API. The  Cloud-Watch Log is used for holding the logging information. Then, the retrieved data is stored in a Dynamo DB that is also done by the lambda function.
 
 ## 2. Building Prediction Model
+Stock predicting is a time-series regression problem. Facebook Prophet model is adopted in the project. It achieves a better result than the AR model, the MA model, and the ARIMA model. The Prophet model is also robust to the shifting trends. The model runs fast and is fully automated. It is also easy to fine-tune the model. So, it fits well in the philosophy of cloud computing.
 
 ## 3. Front-end with Dash and Docker Container
