@@ -25,11 +25,8 @@ To automatically pull the newest data, we built a Lambda Function that is trigge
 Logging is set up for major steps to help with monitoring and debugging.
 
 ### 2. Predicting Stock Prices
-Stock price prediction is a time-series regression problem. After testing multiple models, we chose to use the Prophet model developed by Facebook for this project. It returned more accurate predictions than AR, MA, or ARIMA models. The Prophet model is also robust against the shifting trends, a nice-to-have feature when it comes to predicting stock prices. Considering the complexity of time series modeling and the amount of data used, the model runs reasonably fast and is fully automated. Fine-tuning the model in future iterations of the project is quite easy. As such, it fits well with the philosophy of cloud computing.
+Stock price prediction is a time-series regression problem. After testing multiple models, we chose to use the Prophet model developed by Facebook for this project. The Facebook prophet model is able to analyze seasonality trends and it also requires the least number of features in order to give predictions on future stock prices. It returned more accurate predictions than AR, MA, or ARIMA models. The Prophet model is also robust against the shifting trends, a nice-to-have feature when it comes to predicting stock prices. Considering the complexity of time series modeling and the amount of data used, the model runs reasonably fast and is fully automated. Dataset is fit to the model under 2 minutes and predictions are made instantly. Fine-tuning the model in future iterations of the project is quite easy. There are not that many variables that can be adjusted in the first place. As such, it fits well with the philosophy of cloud computing.
 
-**Some more details about the model**  
-**Some more details about the model**  
-**Some more details about the model**  
 
 ### 3. Interfacing with Users through Dash and Docker
 #### Front End Application Built with Dash
