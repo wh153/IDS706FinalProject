@@ -18,6 +18,6 @@ Stock predicting is a time-series regression problem. Facebook Prophet model is 
 ## 3. Front-end with Dash and Docker Container
 The result is visualized by an interactive plot with Dash. By clicking the "predict" button, new data is retrieved and the model is updated. Then, the new plot is shown in the front-end.
 
-Docker is used for encapsulation. Our application is contained by Docker and hold by EC2.
+Docker is used for encapsulation. Our application is contained by Docker and held by EC2.
 
 ### Continous Integretion and Secret Protection
