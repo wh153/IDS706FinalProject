@@ -21,3 +21,6 @@ The result is visualized by an interactive plot with Dash. By clicking the "pred
 Docker is used for encapsulation. Our application is contained by Docker and held by EC2.
 
 ### Continuous integration and Secret Protection
+Github Actions is used for continuous integration. It is realized by the YML file. The CI workflow is triggered by any push actions. In the CI workflow, the packages, and libraries requirements are checked, the codes are lint and checked to be in good formats, and file integrity is tested using Pytest.
+
+Our API keys and other secrets are protected by Github Secrets. They were written in the YML file as environmental variables and then get called in the Python scripts.
