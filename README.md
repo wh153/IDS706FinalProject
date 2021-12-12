@@ -5,7 +5,7 @@ The project aimed to take advantage of the cloud technologies and platforms to b
 
 1. Retrieving and Storing Data
 2. Predicting Stock Prices
-3. Interfacing with Users with Dash and Docker Container
+3. Interfacing with Users through Dash and Docker
 
 The overall workflow is as follows:
 
@@ -23,9 +23,9 @@ To automatically pull the newest data, we built a Lambda Function that is trigge
 Logging is set up for major steps to help with monitoring and debugging.
 
 ## 2. Predicting Stock Prices
-Stock predicting is a time-series regression problem. Facebook Prophet model is adopted in the project. It achieves a better result than the AR model, the MA model, and the ARIMA model. The Prophet model is also robust to the shifting trends. The model runs fast and is fully automated. It is also easy to fine-tune the model. So, it fits well in the philosophy of cloud computing.
+Stock price prediction is a time-series regression problem. After testing multiple models, we chose to use the Prophet model developed by Facebook for this project. It returned more accurate predictions than AR, MA, or ARIMA models. The Prophet model is also robust against the shifting trends, a nice-to-have feature when it comes to predicting stock prices. Considering the complexity of time series modeling and the amount of data used, the model runs reasonably fast and is fully automated. Fine-tuning the model in future iterations of the project is quite easy. As such, it fits well with the philosophy of cloud computing.
 
-## 3. Interfacing with Users with Dash and Docker Container
+## 3. Interfacing with Users through Dash and Docker
 The result is visualized by an interactive plot with Dash. By clicking the "predict" button, new data is retrieved and the model is updated. Then, the new plot is shown in the front-end.
 
 Docker is used for encapsulation. Our application is contained by Docker and held by EC2.
