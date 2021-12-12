@@ -20,4 +20,4 @@ The result is visualized by an interactive plot with Dash. By clicking the "pred
 
 Docker is used for encapsulation. Our application is contained by Docker and held by EC2.
 
-### Continous Integretion and Secret Protection
+### Continous Integration and Secret Protection
