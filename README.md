@@ -16,3 +16,8 @@ A lambda function triggered by a Cloud-Watch is built for retrieving data every 
 Stock predicting is a time-series regression problem. Facebook Prophet model is adopted in the project. It achieves a better result than the AR model, the MA model, and the ARIMA model. The Prophet model is also robust to the shifting trends. The model runs fast and is fully automated. It is also easy to fine-tune the model. So, it fits well in the philosophy of cloud computing.
 
 ## 3. Front-end with Dash and Docker Container
+The result is visualized by an interactive plot with Dash. By clicking the "predict" button, new data is retrieved and the model is updated. Then, the new plot is shown in the front-end.
+
+Docker is used for encapsulation. Our application is contained by Docker and hold by EC2.
+
+### Continous Integretion and Secret Protection
