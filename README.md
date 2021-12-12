@@ -11,7 +11,8 @@ The application consists of three major parts:
 
 The overall architecture of the application is as follows:
 
-![image](https://user-images.githubusercontent.com/90075179/145724162-c4f8205a-619d-40ae-a3a4-11f20b3f6eb8.png)
+<img width="665" alt="Workflow Fig" src="https://user-images.githubusercontent.com/89489224/145727943-b8eff273-85ca-4bd7-b9b3-255df330c563.png">
+
 
 ### 1. Retrieving and Storing Data
 We use real-time data down to the minute for this project. We obtain data is from the Polygon API (https://polygon.io/). The API is called with RESTful architectural style. We only pulled price for Apple, Inc. (AAPL) for this specific application, but more tickers can be included easily. We used the free-tier Polygon API, so the data pulled and therefore the predictions shown in the front end have a one-day delay, albeit they are still refreshed in "real-time". However, the application is capable of working with actual real-time data instantaneously once we upgrade to a paid-tier Polygon API.
