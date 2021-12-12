@@ -16,7 +16,7 @@ The overall architecture of the application is as follows:
 ### 1. Retrieving and Storing Data
 We use real-time data down to the minute for this project. We obtain data is from the Polygon API (https://polygon.io/). The API is called with RESTful architectural style. We only pulled price for Apple, Inc. (AAPL) for this specific application, but more tickers can be included easily. We used the free-tier Polygon API, so the data pulled and therefore the predictions shown in the front end have a one-day delay, albeit they are still refreshed in "real-time". However, the application is capable of working with actual real-time data instantaneously once we upgrade to a paid-tier Polygon API.
 
-To automatically pull the newest data, we built a Lambda Function that is triggered by a CloudWatch Event every minute. The code for the Lambda function is located at `lambda1/lambda_function.py`, and its dependencies are specified in `lambda1/requirements.txt`. The Lambda Function steps through several processes every time it is triggered:
+To automatically pull the newest data, we built a Lambda Function that is triggered by a EventBridge every minute. The code for the Lambda function is located at `lambda1/lambda_function.py`, and its dependencies are specified in `lambda1/requirements.txt`. The Lambda Function steps through several processes every time it is triggered:
 - It takes note of data that has been stored
 - It pulls data that is not in storage using the Polygon API
 - It cleans the pulled data
