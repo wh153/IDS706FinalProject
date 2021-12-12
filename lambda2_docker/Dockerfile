@@ -3,7 +3,8 @@ FROM continuumio/miniconda3:4.10.3-alpine
 # copy files
 COPY lambda_function.py /app/
 COPY dash_app.py /app/
-COPY forecast.csv /app/
+COPY clean_and_plot.py /app/
+# COPY forecast.csv /app/
 
 # Use conda to install packages
 RUN conda install --yes --freeze-installed -c conda-forge \

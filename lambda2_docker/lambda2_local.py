@@ -208,7 +208,7 @@ def main():
     # print('Finished running: save_model_to_s3')
     # save_forecast_to_s3(forecast)
     # print('Finished running: save_forecast_to_s3')
-    return prophet_model, forecast
+    return df_clean, prophet_model, forecast
 
 
 if __name__ == "__main__":

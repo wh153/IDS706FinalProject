@@ -1,42 +1,20 @@
 import dash
-import dash_html_components as html
-import plotly.graph_objects as go
-import dash_core_components as dcc
-import plotly.express as px
+from dash import html
+from dash import dcc
 from dash.dependencies import Input, Output
 import pandas as pd
 
-from lambda_function import main as run_model
-
-import os
-import sys
+from clean_and_plot import draw_graphs as draw_init_graph
+from clean_and_plot import update_graph_and_table
 
 
+# Initialize dash and plot
 app = dash.Dash()
+df = pd.DataFrame(columns=["Date Time", "Price", "Actual or Predicted"])
+fig = draw_init_graph(df)
 
 
-def draw_graphs(df):
-    fig = px.line(
-        df,
-        x="ds",
-        y="yhat",
-        labels={"x": "Date-Time", "y": "Apple Stock Price"},
-        title="Apple Stock Price",
-        color_discrete_sequence=["red"],
-    )
-
-    return fig
-
-
-#prophet_model, forecast = run_model()
-df = pd.DataFrame(columns=['Unnamed: 0', 'ds', 'trend', 'yhat_lower', 'yhat_upper', 'trend_lower',
-       'trend_upper', 'additive_terms', 'additive_terms_lower',
-       'additive_terms_upper', 'daily', 'daily_lower', 'daily_upper',
-       'multiplicative_terms', 'multiplicative_terms_lower',
-       'multiplicative_terms_upper', 'yhat'])
-fig = draw_graphs(df)
-
-
+# define button style
 button_style = {
     "border": "none",
     "color": "black",
@@ -47,75 +25,117 @@ button_style = {
     "align": "center",
 }
 
+# define dashboard layout
+app.layout = html.Div(
+    [
+        # title of webpage
+        html.H1(
+            "Stock Price Predictions",
+            style={"text-align": "center", "color": "black"},
+        ),
+        # graph
+        html.Div(
+            id="graph",
+            children=dcc.Graph(id="my_bee_map", figure=fig),
+            style={"height": "50%"},
+        ),
+        # predict button
+        html.Div(
+            [
+                html.Button(
+                    "Predict", id="btn-nclicks-2", n_clicks=0, style=button_style
+                ),
+                dcc.Loading(
+                    id="loading",
+                    children=html.Div(id="loading-output"),
+                    type="default",
+                    style={"border": "none", "margin-top": "60px"},
+                ),
+            ],
+            style=button_style,
+        ),
+        # predict button with spinner
+        # html.Div(id="container-button-basic", style={"text-align": "center"}),
+        # spinner
+        # html.Div(
+        #     dbc.Spinner(html.Div(id="loading-output")),
+        # ),
+        # predicted prices
+        html.Div(
+            id="table",
+            children=dash.dash_table.DataTable(
+                id="predicted-prices", columns=[], data=None
+            ),
+            style={
+                "width": "62%",
+                "margin-top": "60px",
+                "margin-bottom": "80px",
+                "margin-left": "auto",
+                "margin-right": "auto",
+            },
+        ),
+    ],
+    style={
+        # "position": "absolute",
+        "width": "100%",
+        "height": "100%",
+        "top": "0px",
+        "left": "0px",
+    },
+)
 
-def app_layout(df):
-    app.layout = html.Div(
-        [
-            html.H1(
-                "Stock Price Predictions",
-                style={"text-align": "center", "color": "black"},
-            ),
-            html.Div(
-                [
-                    dcc.Graph(id="my_bee_map", figure=fig),
-                ],
-                style={"height": "50%"},
-            ),
-            html.Div(
-                [
-                    html.Button(
-                        "Restart", id="btn-nclicks-1", n_clicks=0, style=button_style
-                    ),
-                    html.Button(
-                        "Predict", id="btn-nclicks-2", n_clicks=0, style=button_style
-                    ),
-                ],
-                style=button_style,
-            ),
-            html.Div(
-                id="container-button-timestamp",
-                style={
-                    "text-align": "center",
-                    "color": "black",
-                    "fontSize": 40,
-                    "margin": "auto",
-                },
-            ),
-        ],
-        style={
-            "position": "absolute",
-            "width": "100%",
-            "height": "100%",
-            "top": "0px",
-            "left": "0px",
-        },
+#
+@app.callback(
+    Output("graph", "children"),
+    Output("table", "children"),
+    Output("loading-output", "children"),
+    Input("btn-nclicks-2", "n_clicks"),
+)
+def displayClick(n_clicks):
+    changed_id = [p["prop_id"] for p in dash.callback_context.triggered][0]
+    if "btn-nclicks-2" in changed_id:
+        # new_df = pd.DataFrame(columns=["Date Time", "Price", "Actual or Predicted"])
+        # newplot = draw_init_graph(new_df)
+        # newtable = dash.dash_table.DataTable(
+        #     id="predicted-prices", columns=[{"name": i, "id": i} for i in ['test']], data=None,
+        #     style_cell={"textAlign": "left","align":"center"},
+        # )
+
+        newplot, df_for_table = update_graph_and_table()
+        newtable = dash.dash_table.DataTable(
+            id="predicted-prices",
+            columns=[{"name": i, "id": i} for i in df_for_table.columns],
+            data=df_for_table.to_dict("records"),
+            style_cell={"textAlign": "left"},
+            style_data={"color": "black", "backgroundColor": "white"},
+            style_data_conditional=[
+                {
+                    "if": {"row_index": "odd"},
+                    "backgroundColor": "rgb(220, 220, 220)",
+                }
+            ],
+            style_header={
+                "backgroundColor": "rgb(210, 210, 210)",
+                "color": "black",
+                "fontWeight": "bold",
+            },
+        )
+        print("Predict button pressed {} times".format(n_clicks))
+
+    else:
+        new_df = pd.DataFrame(columns=["Date Time", "Price", "Actual or Predicted"])
+        newplot = draw_init_graph(new_df)
+        newtable = dash.dash_table.DataTable(
+            id="predicted-prices", columns=[], data=None
+        )
+        print("Button not clicked yet")
+
+    return (
+        dcc.Graph(id="new-bee-plot", figure=newplot, style={"height": "50%"}),
+        newtable,
+        "",
     )
 
 
-app_layout(df)
-
-
-@app.callback(
-    Output("container-button-timestamp", "children"),
-    [Input("btn-nclicks-1", "n_clicks"), Input("btn-nclicks-2", "n_clicks")],
-)
-def displayClick(btn1, btn2):
-    changed_id = [p["prop_id"] for p in dash.callback_context.triggered][0]
-    print(changed_id)
-    msg = str()
-
-    if "btn-nclicks-2.n_clicks" == changed_id:
-        print("YES")
-        new_model, new_df = run_model()
-        fig = draw_graphs(new_df)
-        app_layout(new_df)
-
-    elif "btn-nclicks-1.n_clicks" == changed_id:
-        print("YES")
-        os.execl(sys.executable, sys.executable, *sys.argv)
-    else:
-        print("")
-
-
 if __name__ == "__main__":
-    app.run_server(host="0.0.0.0", port=80)
+    app.run_server(port=8080, debug=True)

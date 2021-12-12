@@ -6,7 +6,10 @@ import plotly.express as px
 from dash.dependencies import Input, Output
 import pandas as pd
 
-#from lambda2_local import main as run_model
+from lambda_function import main as run_model
+
+import os
+import sys
 
 
 app = dash.Dash()
@@ -26,7 +29,11 @@ def draw_graphs(df):
 
 
 #prophet_model, forecast = run_model()
-df = pd.read_csv("forecast.csv")
+df = pd.DataFrame(columns=['Unnamed: 0', 'ds', 'trend', 'yhat_lower', 'yhat_upper', 'trend_lower',
+       'trend_upper', 'additive_terms', 'additive_terms_lower',
+       'additive_terms_upper', 'daily', 'daily_lower', 'daily_upper',
+       'multiplicative_terms', 'multiplicative_terms_lower',
+       'multiplicative_terms_upper', 'yhat'])
 fig = draw_graphs(df)
 
 
@@ -88,5 +95,27 @@ def app_layout(df):
 app_layout(df)
 
 
+@app.callback(
+    Output("container-button-timestamp", "children"),
+    [Input("btn-nclicks-1", "n_clicks"), Input("btn-nclicks-2", "n_clicks")],
+)
+def displayClick(btn1, btn2):
+    changed_id = [p["prop_id"] for p in dash.callback_context.triggered][0]
+    print(changed_id)
+    msg = str()
+
+    if "btn-nclicks-2.n_clicks" == changed_id:
+        print("YES")
+        new_model, new_df = run_model()
+        fig = draw_graphs(new_df)
+        app_layout(new_df)
+
+    elif "btn-nclicks-1.n_clicks" == changed_id:
+        print("YES")
+        os.execl(sys.executable, sys.executable, *sys.argv)
+    else:
+        print("")
+
+
 if __name__ == "__main__":
-    app.run_server(port=80, debug=True)
+    app.run_server(host="0.0.0.0", port=80)
